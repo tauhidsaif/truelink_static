@@ -21,6 +21,15 @@
         .modal-backdrop { padding: 0.75rem; gap: 0.5rem; }
         .rounded-2xl { border-radius: 12px; }
       }
+      /* ✅ WhatsApp modal responsive fix */
+      #modalWA .flex.gap-2 {
+        flex-wrap: wrap;
+      }
+      #modalWA select, 
+      #modalWA input {
+        flex: 1 1 100%;
+        min-width: 0;
+      }
     </style>
   </head>
   <body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
