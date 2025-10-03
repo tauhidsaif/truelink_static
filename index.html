@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TrueLink • Static Deep Link Shortener</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      :root { color-scheme: light dark; }
+      body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+      /* modal spacing on small */
+      .modal-backdrop { gap: 1rem; padding: 1rem; }
+    </style>
+  </head>
+  <body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+    <div class="max-w-3xl mx-auto p-4 sm:p-6">
+      <header class="flex items-center gap-3 mb-6 sm:mb-8">
+        <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-black to-gray-800 text-white flex items-center justify-center text-2xl shadow-lg">⚡</div>
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">TrueLink (Static)</h1>
+          <p class="text-xs sm:text-sm text-gray-500">Client-side deep links — no backend required.</p>
+        </div>
+      </header>
+
+      <main class="bg-white rounded-2xl shadow-lg p-4 sm:p-6 space-y-6 border border-gray-100">
+        <div class="grid md:grid-cols-3 gap-4">
+          <div class="md:col-span-2">
+            <label class="text-sm font-medium text-gray-700">Target URL</label>
+            <input id="url" type="url" placeholder="https://youtube.com/watch?v=..." class="mt-1 w-full rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black transition"/>
+            <div class="text-xs text-gray-500 mt-1">Or use the WhatsApp / Gmail shortcuts below.</div>
+          </div>
+          <div>
+            <label class="text-sm font-medium text-gray-700">Custom slug (optional)</label>
+            <input id="slug" placeholder="(kept for local use only)" class="mt-1 w-full rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black transition"/>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:gap-3 gap-2">
+          <div class="flex items-center gap-3">
+            <button id="btnGen" class="rounded-xl bg-gradient-to-r from-black to-gray-800 text-white px-5 py-2.5 font-medium shadow hover:opacity-90 active:scale-95 transition">
+              Generate
+            </button>
+
+            <div class="flex gap-2">
+              <button id="btnWhatsApp" class="rounded-xl bg-green-600 text-white px-3 py-2.5 font-medium shadow hover:opacity-90 active:scale-95 transition flex items-center gap-2">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden><path d="M20.52 3.478A11.95 11.95 0 0 0 12 0C5.373 0 .04 5.332.04 11.958 0 14.371.73 16.63 2.06 18.42L.04 24l5.78-2.03A11.95 11.95 0 0 0 12 24c6.627 0 11.96-5.332 11.96-11.958 0-3.21-1.266-6.213-3.44-8.564z" fill="#1bd741"/><path d="M17.5 14.1c-.3-.15-1.76-.86-2.03-.96-.27-.1-.47-.15-.67.15-.2.3-.78.96-.96 1.15-.18.2-.36.23-.66.08-.3-.15-1.26-.47-2.4-1.48-.89-.79-1.48-1.78-1.66-2.08-.18-.3-.02-.46.13-.61.14-.14.3-.36.45-.54.15-.18.2-.3.3-.5.1-.2 0-.38-.05-.53-.05-.15-.67-1.6-.92-2.2-.24-.58-.49-.5-.67-.5-.17 0-.37 0-.57 0-.2 0-.53.07-.81.37-.27.3-1.03 1-1.03 2.45s1.05 2.84 1.2 3.04c.15.2 2.07 3.14 5.02 4.4 2.95 1.26 2.95.84 3.48.78.53-.06 1.76-.72 2.01-1.42.25-.7.25-1.3.17-1.42-.07-.12-.27-.18-.57-.33z" fill="#fff"/></svg>
+                WhatsApp
+              </button>
+
+              <button id="btnGmail" class="rounded-xl bg-[#d44638] text-white px-3 py-2.5 font-medium shadow hover:opacity-90 active:scale-95 transition flex items-center gap-2">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden><path d="M1.5 4.5h21v15h-21z" fill="#d44638"/><path d="M12 13L1.5 5.5V19h21V5.5z" fill="#fff" opacity=".15"/><path d="M12 11.1L21.5 5.5h-19z" fill="#fff"/></svg>
+                Gmail
+              </button>
+            </div>
+          </div>
+
+          <div id="msg" class="text-sm text-red-600 font-medium mt-2 sm:mt-0"></div>
+        </div>
+
+        <!-- Result -->
+        <div id="resultBox" class="hidden border border-gray-200 rounded-xl p-4 sm:p-5 bg-gray-50">
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div>
+              <div class="text-xs uppercase text-gray-500 font-medium">Your short link</div>
+              <a id="shortLink" href="#" class="text-base sm:text-lg font-semibold break-all text-blue-600 hover:underline"></a>
+            </div>
+            <div class="flex items-center gap-2">
+              <button id="btnCopy" class="text-sm underline text-gray-700 hover:text-black transition">Copy</button>
+              <a id="btnOpen" target="_blank" class="rounded-lg bg-black text-white px-3 py-1.5 text-sm shadow hover:opacity-90 transition">Open</a>
+            </div>
+          </div>
+
+          <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <div class="text-xs uppercase text-gray-500 mb-2 font-medium">QR Code</div>
+              <div class="border rounded-lg p-3 inline-block bg-white shadow-sm" id="qrcodeVisibleWrap">
+                <!-- qrcodejs will render here (canvas) -->
+                <div id="qrcodeVisible"></div>
+              </div>
+              <div class="mt-2">
+                <button id="downloadQR" class="text-sm underline">Download QR</button>
+              </div>
+            </div>
+            <div class="text-sm text-gray-600 leading-relaxed">
+              <p class="mb-2 font-medium">Tips for Instagram:</p>
+              <ul class="list-disc ml-5 space-y-1">
+                <li>Use this link in your bio, stories, or DMs.</li>
+                <li>On Android we push an <code>intent://</code> that opens the native app.</li>
+                <li>On iPhone we try the app scheme first and then fall back to web link.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <section class="mt-6">
+        <div class="bg-white rounded-2xl shadow-lg p-4 sm:p-6 border border-gray-100">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="font-semibold text-base sm:text-lg">Recent links</h2>
+            <button id="btnRefresh" class="text-sm underline text-gray-700 hover:text-black transition">Refresh</button>
+          </div>
+          <div id="recent" class="space-y-3 text-sm text-gray-700 divide-y divide-gray-200"></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Modals -->
+    <div id="modalWA" class="fixed inset-0 hidden items-center justify-center z-50 bg-black/40 modal-backdrop">
+      <div class="bg-white rounded-xl shadow-xl p-4 sm:p-6 max-w-md w-full mx-2">
+        <h3 class="text-lg font-semibold mb-2">Create WhatsApp link</h3>
+        <label class="text-sm text-gray-600">Phone number (international, digits only)</label>
+        <input id="waNumber" class="mt-1 w-full rounded-lg border px-3 py-2" placeholder="e.g. 919548065207"/>
+        <label class="text-sm text-gray-600 mt-3 block">Message (optional)</label>
+        <input id="waMessage" class="mt-1 w-full rounded-lg border px-3 py-2" placeholder="Hello"/>
+        <div class="mt-4 flex justify-end gap-2">
+          <button id="waCancel" class="px-3 py-2 rounded-lg border">Cancel</button>
+          <button id="waCreate" class="px-3 py-2 rounded-lg bg-green-600 text-white">Create</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="modalG" class="fixed inset-0 hidden items-center justify-center z-50 bg-black/40 modal-backdrop">
+      <div class="bg-white rounded-xl shadow-xl p-4 sm:p-6 max-w-md w-full mx-2">
+        <h3 class="text-lg font-semibold mb-2">Create Gmail link</h3>
+        <label class="text-sm text-gray-600">Recipient email</label>
+        <input id="gEmail" class="mt-1 w-full rounded-lg border px-3 py-2" placeholder="you@example.com"/>
+        <label class="text-sm text-gray-600 mt-3 block">Subject (optional)</label>
+        <input id="gSubject" class="mt-1 w-full rounded-lg border px-3 py-2" placeholder="Subject"/>
+        <label class="text-sm text-gray-600 mt-3 block">Body (optional)</label>
+        <textarea id="gBody" class="mt-1 w-full rounded-lg border px-3 py-2" rows="3" placeholder="Message body"></textarea>
+        <div class="mt-4 flex justify-end gap-2">
+          <button id="gCancel" class="px-3 py-2 rounded-lg border">Cancel</button>
+          <button id="gCreate" class="px-3 py-2 rounded-lg bg-[#d44638] text-white">Create</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- libs -->
+    <script src="https://cdn.jsdelivr.net/npm/lz-string/libs/lz-string.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="s.js"></script>
+  </body>
+</html>
