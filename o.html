@@ -11,6 +11,8 @@
     @keyframes spin{to{transform:rotate(360deg)}}
     a{display:inline-block;margin-top:8px;padding:8px 14px;background:#111;color:#fff;border-radius:8px;text-decoration:none}
     @media (max-width:420px){ .card{padding:16px} .spinner{width:40px;height:40px} }
+    /* keep fallback link from overflowing on tiny screens */
+    .card a { max-width:100%; overflow-wrap:anywhere; display:inline-block; }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/lz-string/libs/lz-string.min.js"></script>
 </head>

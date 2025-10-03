@@ -196,7 +196,7 @@ async function loadRecent() {
         <div class="text-gray-500 truncate">→ ${r.url}</div>
         <div class="text-xs text-gray-400 mt-0.5">${fmtTime(r.createdAt || Date.now())}</div>
       </div>
-      <div class="flex items-center gap-2 shrink-0">
+      <div class="flex items-center gap-2 shrink-0 recent-actions">
         <a class="text-sm underline" href="${r.shortUrl}" target="_blank" rel="noreferrer">Open</a>
         <button class="text-sm underline" data-copy="${r.shortUrl}">Copy</button>
         <button class="text-sm underline" data-download-qr="${r.shortUrl}">Download QR</button>

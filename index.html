@@ -10,9 +10,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
       :root { color-scheme: light dark; }
-      body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+      html,body { height:100%; }
+      body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
       /* modal spacing on small */
       .modal-backdrop { gap: 1rem; padding: 1rem; }
+      /* ensure form elements don't overflow on tiny screens */
+      input, textarea, button { box-sizing: border-box; -webkit-appearance: none; -moz-appearance: none; }
+      /* make QR wrap responsive */
+      #qrcodeVisible canvas, #qrcodeVisible img { max-width:100%; height:auto; display:block; }
+      /* avoid long link push layout — truncate but allow wrap inside result box */
+      #shortLink { word-break: break-all; max-width: 100%; display:block; }
+      /* ensure recent item truncation but allow actions to wrap on small screens */
+      .recent-actions { gap: 0.5rem; flex-wrap: wrap; }
+      /* small tweaks for modal inner content on extra small screens */
+      @media (max-width: 420px) {
+        .modal-backdrop { padding: 0.75rem; gap: 0.5rem; }
+        .rounded-2xl { border-radius: 12px; }
+      }
     </style>
   </head>
   <body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
@@ -40,18 +54,18 @@
 
         <!-- Actions -->
         <div class="flex flex-col sm:flex-row sm:items-center sm:gap-3 gap-2">
-          <div class="flex items-center gap-3">
+          <div class="flex items-center gap-3 flex-wrap">
             <button id="btnGen" class="rounded-xl bg-gradient-to-r from-black to-gray-800 text-white px-5 py-2.5 font-medium shadow hover:opacity-90 active:scale-95 transition">
               Generate
             </button>
 
-            <div class="flex gap-2">
-              <button id="btnWhatsApp" class="rounded-xl bg-green-600 text-white px-3 py-2.5 font-medium shadow hover:opacity-90 active:scale-95 transition flex items-center gap-2">
+            <div class="flex gap-2 flex-wrap">
+              <button id="btnWhatsApp" class="rounded-xl bg-green-600 text-white px-3 py-2.5 font-medium shadow hover:opacity-90 active:scale-95 transition flex items-center gap-2 whitespace-nowrap">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden><path d="M20.52 3.478A11.95 11.95 0 0 0 12 0C5.373 0 .04 5.332.04 11.958 0 14.371.73 16.63 2.06 18.42L.04 24l5.78-2.03A11.95 11.95 0 0 0 12 24c6.627 0 11.96-5.332 11.96-11.958 0-3.21-1.266-6.213-3.44-8.564z" fill="#1bd741"/><path d="M17.5 14.1c-.3-.15-1.76-.86-2.03-.96-.27-.1-.47-.15-.67.15-.2.3-.78.96-.96 1.15-.18.2-.36.23-.66.08-.3-.15-1.26-.47-2.4-1.48-.89-.79-1.48-1.78-1.66-2.08-.18-.3-.02-.46.13-.61.14-.14.3-.36.45-.54.15-.18.2-.3.3-.5.1-.2 0-.38-.05-.53-.05-.15-.67-1.6-.92-2.2-.24-.58-.49-.5-.67-.5-.17 0-.37 0-.57 0-.2 0-.53.07-.81.37-.27.3-1.03 1-1.03 2.45s1.05 2.84 1.2 3.04c.15.2 2.07 3.14 5.02 4.4 2.95 1.26 2.95.84 3.48.78.53-.06 1.76-.72 2.01-1.42.25-.7.25-1.3.17-1.42-.07-.12-.27-.18-.57-.33z" fill="#fff"/></svg>
                 WhatsApp
               </button>
 
-              <button id="btnGmail" class="rounded-xl bg-[#d44638] text-white px-3 py-2.5 font-medium shadow hover:opacity-90 active:scale-95 transition flex items-center gap-2">
+              <button id="btnGmail" class="rounded-xl bg-[#d44638] text-white px-3 py-2.5 font-medium shadow hover:opacity-90 active:scale-95 transition flex items-center gap-2 whitespace-nowrap">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden><path d="M1.5 4.5h21v15h-21z" fill="#d44638"/><path d="M12 13L1.5 5.5V19h21V5.5z" fill="#fff" opacity=".15"/><path d="M12 11.1L21.5 5.5h-19z" fill="#fff"/></svg>
                 Gmail
               </button>
@@ -79,7 +93,7 @@
               <div class="text-xs uppercase text-gray-500 mb-2 font-medium">QR Code</div>
               <div class="border rounded-lg p-3 inline-block bg-white shadow-sm" id="qrcodeVisibleWrap">
                 <!-- qrcodejs will render here (canvas) -->
-                <div id="qrcodeVisible"></div>
+                <div id="qrcodeVisible" style="width:160px;height:160px;"></div>
               </div>
               <div class="mt-2">
                 <button id="downloadQR" class="text-sm underline">Download QR</button>
