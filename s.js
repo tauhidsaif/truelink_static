@@ -58,7 +58,17 @@ function renderVisibleQr(text, size = 160) {
   new QRCode(wrap, { text, width: size, height: size, correctLevel: QRCode.CorrectLevel.M });
 }
 
-// generate dataURL (PNG) from qrcodejs output (returns Promise)
+/*
+  generateQrDataUrl(text, size)
+
+  Produces a PNG dataURL. NOTE: this function now renders the QR at `size` px
+  then draws it centered onto a larger white canvas with a visible margin
+  (quiet zone). This produces a downloaded image like your second screenshot:
+  a centered QR with a white border so scanning is easier when printing or
+  when the image is displayed in other apps.
+
+  size: pixel size of the QR area (e.g. 800). The final canvas will add padding.
+*/
 function generateQrDataUrl(text, size = 600) {
   return new Promise((resolve, reject) => {
     try {
@@ -66,25 +76,75 @@ function generateQrDataUrl(text, size = 600) {
       c.innerHTML = "";
       const qdiv = document.createElement("div");
       c.appendChild(qdiv);
+
+      // Render QR at requested size
       new QRCode(qdiv, { text, width: size, height: size, correctLevel: QRCode.CorrectLevel.M });
+
       // allow a short tick for rendering
       setTimeout(() => {
+        // fetch rendered element (canvas preferred, else image)
         const canvas = qdiv.querySelector("canvas");
+        const imgEl = qdiv.querySelector("img");
+
+        // helper to create final image with white margin and return dataURL
+        const finalizeFromDataUrl = (srcDataUrl) => {
+          const img = new Image();
+          img.onload = () => {
+            // padding: 20-30% of QR size to create a large quiet zone (you can tune)
+            const padding = Math.round(size * 0.05); // 20% padding on each side
+            const finalSize = size + padding * 2;
+            const finalCanvas = document.createElement("canvas");
+            finalCanvas.width = finalSize;
+            finalCanvas.height = finalSize;
+            const ctx = finalCanvas.getContext("2d");
+
+            // fill background white (ensures white border even on dark UIs)
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, finalSize, finalSize);
+
+            // draw QR centered
+            const dx = padding;
+            const dy = padding;
+            ctx.drawImage(img, dx, dy, size, size);
+
+            // optional: small subtle inner white margin between QR and outer white? (not applied)
+            // return final PNG
+            resolve(finalCanvas.toDataURL("image/png"));
+          };
+          img.onerror = (err) => reject(new Error("Failed to load intermediate QR image: " + err));
+          img.src = srcDataUrl;
+        };
+
         if (canvas) {
-          resolve(canvas.toDataURL("image/png"));
-          return;
+          // use the canvas directly -> convert to dataURL then finalize
+          try {
+            const src = canvas.toDataURL("image/png");
+            finalizeFromDataUrl(src);
+            return;
+          } catch (e) {
+            // continue to try img path
+            console.error(e);
+          }
         }
-        const img = qdiv.querySelector("img");
-        if (img) {
-          const canvas2 = document.createElement("canvas");
-          canvas2.width = size; canvas2.height = size;
-          const ctx = canvas2.getContext("2d");
-          ctx.drawImage(img, 0, 0, size, size);
-          resolve(canvas2.toDataURL("image/png"));
-          return;
+
+        if (imgEl) {
+          // qrcodejs sometimes emits an img instead of canvas
+          try {
+            const tmpCanvas = document.createElement("canvas");
+            tmpCanvas.width = size;
+            tmpCanvas.height = size;
+            const ctx = tmpCanvas.getContext("2d");
+            ctx.drawImage(imgEl, 0, 0, size, size);
+            const src = tmpCanvas.toDataURL("image/png");
+            finalizeFromDataUrl(src);
+            return;
+          } catch (e) {
+            console.error(e);
+          }
         }
+
         reject(new Error("QR render failed"));
-      }, 50);
+      }, 60);
     } catch (err) { reject(err); }
   });
 }
@@ -126,6 +186,7 @@ async function createLinkFromUrl(url, slug) {
   dl.onclick = async (e) => {
     e.preventDefault();
     dl.disabled = true;
+    // NOTE: same interface — size here is QR pixel size before padding.
     const dataUrl = await generateQrDataUrl(link, 800).catch((err) => { console.error(err); setMsg("QR generation failed"); return null; });
     if (dataUrl) downloadDataUrl(dataUrl, "qrcode.png");
     dl.disabled = false;
@@ -223,6 +284,7 @@ async function loadRecent() {
     btn.addEventListener("click", async () => {
       const shortUrl = btn.getAttribute("data-download-qr");
       btn.disabled = true; const old = btn.textContent; btn.textContent = "Preparing...";
+      // same generateQrDataUrl used here — returns image with white border
       const dataUrl = await generateQrDataUrl(shortUrl, 800).catch((err) => { console.error(err); setMsg("QR generation failed"); return null; });
       if (dataUrl) downloadDataUrl(dataUrl, "qrcode.png");
       btn.disabled = false; btn.textContent = old;
