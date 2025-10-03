@@ -208,18 +208,23 @@ function closeModal(id) { const m = el(id); if (!m) return; m.classList.add("hid
 
 // WhatsApp create
 async function waCreateHandler() {
+  const cc = (el("waCountry").value || "91").trim(); // default India
   const num = (el("waNumber").value || "").trim();
   const msg = (el("waMessage").value || "").trim();
+
   if (!num) { setMsg("Phone number required."); return; }
+
   const digits = num.replace(/\D/g, "");
   if (!/^\d{6,15}$/.test(digits)) { setMsg("Enter a valid phone number (6–15 digits)."); return; }
+
+  const fullNumber = cc + digits; // combine country code + number
   const encoded = encodeURIComponent(msg || "Hello");
-  const waUrl = `https://wa.me/${encodeURIComponent(digits)}?text=${encoded}`;
+  const waUrl = `https://wa.me/${encodeURIComponent(fullNumber)}?text=${encoded}`;
+
   closeModal("modalWA");
   el("waNumber").value = ""; el("waMessage").value = "";
   await createLinkFromUrl(waUrl, "");
 }
-
 // Gmail create
 async function gCreateHandler() {
   const email = (el("gEmail").value || "").trim();

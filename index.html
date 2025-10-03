@@ -12,17 +12,11 @@
       :root { color-scheme: light dark; }
       html,body { height:100%; }
       body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
-      /* modal spacing on small */
       .modal-backdrop { gap: 1rem; padding: 1rem; }
-      /* ensure form elements don't overflow on tiny screens */
       input, textarea, button { box-sizing: border-box; -webkit-appearance: none; -moz-appearance: none; }
-      /* make QR wrap responsive */
       #qrcodeVisible canvas, #qrcodeVisible img { max-width:100%; height:auto; display:block; }
-      /* avoid long link push layout — truncate but allow wrap inside result box */
       #shortLink { word-break: break-all; max-width: 100%; display:block; }
-      /* ensure recent item truncation but allow actions to wrap on small screens */
       .recent-actions { gap: 0.5rem; flex-wrap: wrap; }
-      /* small tweaks for modal inner content on extra small screens */
       @media (max-width: 420px) {
         .modal-backdrop { padding: 0.75rem; gap: 0.5rem; }
         .rounded-2xl { border-radius: 12px; }
@@ -92,7 +86,6 @@
             <div>
               <div class="text-xs uppercase text-gray-500 mb-2 font-medium">QR Code</div>
               <div class="border rounded-lg p-3 inline-block bg-white shadow-sm" id="qrcodeVisibleWrap">
-                <!-- qrcodejs will render here (canvas) -->
                 <div id="qrcodeVisible" style="width:160px;height:160px;"></div>
               </div>
               <div class="mt-2">
@@ -126,8 +119,20 @@
     <div id="modalWA" class="fixed inset-0 hidden items-center justify-center z-50 bg-black/40 modal-backdrop">
       <div class="bg-white rounded-xl shadow-xl p-4 sm:p-6 max-w-md w-full mx-2">
         <h3 class="text-lg font-semibold mb-2">Create WhatsApp link</h3>
-        <label class="text-sm text-gray-600">Phone number (international, digits only)</label>
-        <input id="waNumber" class="mt-1 w-full rounded-lg border px-3 py-2" placeholder="e.g. 919548065207"/>
+        
+        <!-- Country Code + Number -->
+        <label class="text-sm text-gray-600">Phone number</label>
+        <div class="flex gap-2 mt-1">
+          <select id="waCountry" class="rounded-lg border px-2 py-2">
+            <option value="91" selected>+91 (India)</option>
+            <option value="1">+1 (USA)</option>
+            <option value="44">+44 (UK)</option>
+            <option value="971">+971 (UAE)</option>
+            <option value="61">+61 (Australia)</option>
+          </select>
+          <input id="waNumber" class="flex-1 rounded-lg border px-3 py-2" placeholder="e.g. 9548065207"/>
+        </div>
+
         <label class="text-sm text-gray-600 mt-3 block">Message (optional)</label>
         <input id="waMessage" class="mt-1 w-full rounded-lg border px-3 py-2" placeholder="Hello"/>
         <div class="mt-4 flex justify-end gap-2">
